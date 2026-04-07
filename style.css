@@ -1,0 +1,102 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: linear-gradient(to right, #e3f2fd, #fce4ec);
+}
+
+/* Container */
+.home-container {
+  padding: 20px;
+  text-align: center;
+}
+
+/* Title */
+.home-title {
+  font-size: 32px;
+  color: #1976d2;
+  margin-bottom: 20px;
+}
+
+/* Search */
+.search-bar {
+  width: 320px;
+  padding: 12px;
+  border-radius: 25px;
+  border: 1px solid #ccc;
+  outline: none;
+  margin-bottom: 25px;
+  font-size: 16px;
+}
+
+/* Grid */
+.medicine-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 20px;
+}
+
+/* Card */
+.medicine-card {
+  background: #fff;
+  padding: 15px;
+  border-radius: 12px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  transition: 0.3s;
+}
+
+.medicine-card:hover {
+  transform: translateY(-5px);
+}
+
+/* Image */
+.medicine-img {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+/* Name */
+.medicine-name {
+  font-size: 18px;
+  margin: 10px 0;
+  color: #333;
+}
+
+/* Description */
+.medicine-desc {
+  font-size: 14px;
+  color: #666;
+}
+
+/* Price */
+.medicine-price {
+  color: green;
+  margin: 10px 0;
+}
+
+/* Stock */
+.medicine-stock {
+  font-size: 14px;
+  color: #444;
+}
+
+/* Button */
+.cart-btn {
+  background: #1976d2;
+  color: white;
+  padding: 10px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  width: 100%;
+}
+
+.cart-btn:hover {
+  background: #0d47a1;
+}
+
+/* No data */
+.no-data {
+  color: red;
+}
