@@ -1,79 +1,95 @@
-import { useEffect, useState } from "react";
-import axios from "axios";
+import React, { useEffect, useState } from "react";
+import { getUser, logoutUser, isLoggedIn } from "../utils/auth";
+import { useNavigate } from "react-router-dom";
 
 function Profile() {
   const [user, setUser] = useState(null);
   const [orders, setOrders] = useState([]);
+  const [addresses, setAddresses] = useState([]);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const u = JSON.parse(localStorage.getItem("user"));
-
-    if (!u) {
-      window.location.href = "/login";
-    } else {
-      setUser(u);
-      fetchOrders(u._id);
+    if (!isLoggedIn()) {
+      navigate("/login");
+      return;
     }
-  }, []);
 
-  const fetchOrders = async (userId) => {
-    try {
-      const res = await axios.get(
-        `http://localhost:5000/api/orders/${userId}`
-      );
-      setOrders(res.data);
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
-  if (!user) return <h2>Loading...</h2>;
+    setUser(getUser());
+    setOrders(JSON.parse(localStorage.getItem("orders")) || []);
+    setAddresses(JSON.parse(localStorage.getItem("addresses")) || []);
+  }, [navigate]);
 
   return (
-    <div style={styles.container}>
-      
-      {/* 👤 USER INFO */}
-      <div style={styles.card}>
+    <div style={container}>
+      {/* HEADER */}
+      <div style={header}>
         <h2>👤 My Profile</h2>
-        <p><b>Name:</b> {user.name}</p>
-        <p><b>Email:</b> {user.email}</p>
+
+        <div>
+          <button style={navBtn} onClick={() => navigate("/")}>Home</button>
+          <button style={navBtn} onClick={() => navigate("/orders")}>Orders</button>
+          <button style={navBtn} onClick={() => navigate("/cart")}>Cart</button>
+        </div>
       </div>
 
-      {/* 📦 ORDERS */}
-      <div style={styles.card}>
-        <h2>📦 My Orders</h2>
+      {/* USER CARD */}
+      <div style={card}>
+        <h3>👋 Welcome, {user?.name}</h3>
+        <p>Email: {user?.email}</p>
+
+        <button
+          style={logoutBtn}
+          onClick={() => {
+            logoutUser();
+            navigate("/login");
+          }}
+        >
+          Logout
+        </button>
+      </div>
+
+      {/* ADDRESS SECTION */}
+      <div style={card}>
+        <h3>📍 Saved Addresses</h3>
+
+        {addresses.length === 0 ? (
+          <p>No address added</p>
+        ) : (
+          addresses.map((addr, i) => (
+            <div key={i} style={addressBox}>
+              <p><b>{addr.name}</b> ({addr.phone})</p>
+              <p>{addr.house}, {addr.city}, {addr.state} - {addr.pincode}</p>
+              <p style={{ fontSize: "13px", color: "gray" }}>
+                {addr.fullAddress}
+              </p>
+              {addr.landmark && <p>📍 {addr.landmark}</p>}
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* ORDERS SECTION */}
+      <div style={card}>
+        <h3>📦 Recent Orders</h3>
 
         {orders.length === 0 ? (
           <p>No orders yet</p>
         ) : (
-          orders.map((o, i) => (
-            <div key={i} style={styles.orderBox}>
-              
-              <p><b>Order ID:</b> {o._id}</p>
-              <p><b>Total:</b> ₹{o.total}</p>
-              <p>
-                <b>Status:</b>{" "}
-                <span style={{
-                  color: o.status === "Pending" ? "orange" : "green"
-                }}>
-                  {o.status}
-                </span>
+          orders.slice(0, 3).map((order, i) => (
+            <div key={i} style={orderBox}>
+              <p><b>Order #{order.id || i + 1}</b></p>
+              <p>Total: ₹{order.total}</p>
+              <p style={{ fontSize: "12px", color: "gray" }}>
+                {order.date || "Recently placed"}
               </p>
-
-              <p><b>Date:</b> {new Date(o.date).toLocaleString()}</p>
-
-              {/* 🧾 ITEMS */}
-              <div>
-                {o.items.map((item, idx) => (
-                  <div key={idx} style={styles.item}>
-                    {item.name} × {item.qty || 1}
-                  </div>
-                ))}
-              </div>
-
             </div>
           ))
         )}
+
+        <button style={viewBtn} onClick={() => navigate("/orders")}>
+          View All Orders →
+        </button>
       </div>
     </div>
   );
@@ -81,27 +97,70 @@ function Profile() {
 
 export default Profile;
 
-const styles = {
-  container: {
-    padding: "30px",
-    background: "#f9fafb",
-    minHeight: "100vh"
-  },
-  card: {
-    background: "white",
-    padding: "20px",
-    borderRadius: "12px",
-    marginBottom: "20px",
-    boxShadow: "0 5px 15px rgba(0,0,0,0.05)"
-  },
-  orderBox: {
-    border: "1px solid #ddd",
-    padding: "10px",
-    borderRadius: "10px",
-    marginTop: "10px"
-  },
-  item: {
-    fontSize: "14px",
-    color: "#555"
-  }
+
+/* ================= STYLES ================= */
+
+const container = {
+  padding: "25px",
+  background: "#f1f5f9",
+  minHeight: "100vh",
+};
+
+const header = {
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  marginBottom: "20px",
+};
+
+const navBtn = {
+  marginLeft: "10px",
+  padding: "8px 12px",
+  background: "#2563eb",
+  color: "white",
+  border: "none",
+  borderRadius: "6px",
+  cursor: "pointer",
+};
+
+const card = {
+  background: "white",
+  padding: "20px",
+  borderRadius: "12px",
+  marginBottom: "20px",
+  boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+};
+
+const logoutBtn = {
+  marginTop: "10px",
+  padding: "8px 12px",
+  background: "#ef4444",
+  color: "white",
+  border: "none",
+  borderRadius: "6px",
+};
+
+const addressBox = {
+  padding: "10px",
+  border: "1px solid #ddd",
+  borderRadius: "8px",
+  marginTop: "10px",
+  background: "#fafafa",
+};
+
+const orderBox = {
+  padding: "10px",
+  border: "1px solid #ddd",
+  borderRadius: "8px",
+  marginTop: "10px",
+};
+
+const viewBtn = {
+  marginTop: "10px",
+  padding: "10px",
+  background: "#16a34a",
+  color: "white",
+  border: "none",
+  borderRadius: "8px",
+  cursor: "pointer",
 };
